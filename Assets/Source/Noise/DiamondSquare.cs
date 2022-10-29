@@ -250,7 +250,7 @@ namespace VertexFragment
         /// <param name="stepSize"></param>
         /// <param name="offsetMod"></param>
         /// <returns></returns>
-        private float SampleSquare(int x, int y, int stepSize, float offsetMod)
+        private float SampleDiamond(int x, int y, int stepSize, float offsetMod)
         {
             int left = (int)Mathf.Clamp(x - stepSize, 0, Dimensions - 1);
             int right = (int)Mathf.Clamp(x + stepSize, 0, Dimensions - 1);
@@ -271,7 +271,7 @@ namespace VertexFragment
         /// <param name="stepSize"></param>
         /// <param name="offsetMod"></param>
         /// <returns></returns>
-        private float SampleSquare2(int x, int y, int stepSize, float offsetMod)
+        private float SampleSquare(int x, int y, int stepSize, float offsetMod)
         {
             int left = (int)Mathf.Clamp(x - stepSize, 0, Dimensions - 1);
             int right = (int)Mathf.Clamp(x + stepSize, 0, Dimensions - 1);
@@ -331,7 +331,7 @@ namespace VertexFragment
 
                         if (Noise.IsValidPosition(dx, dy) && !IsSetMap[dx, dy])
                         {
-                            Noise.SetValue(dx, dy, Noise.SampleSquare(dx, dy, StepSize, OffsetModifier), IsSetMap);
+                            Noise.SetValue(dx, dy, Noise.SampleDiamond(dx, dy, StepSize, OffsetModifier), IsSetMap);
                         }
                     }
                 }
@@ -368,7 +368,7 @@ namespace VertexFragment
 
                         if (Noise.IsValidPosition(s0x, s0y) && !IsSetMap[s0x, s0y])
                         {
-                            Noise.SetValue(s0x, s0y, Noise.SampleSquare2(s0x, s0y, StepSize, OffsetModifier), IsSetMap);
+                            Noise.SetValue(s0x, s0y, Noise.SampleSquare(s0x, s0y, StepSize, OffsetModifier), IsSetMap);
                         }
 
                         int s1x = originX;
@@ -376,7 +376,7 @@ namespace VertexFragment
 
                         if (Noise.IsValidPosition(s1x, s1y) && !IsSetMap[s1x, s1y])
                         {
-                            Noise.SetValue(s1x, s1y, Noise.SampleSquare2(s1x, s1y, StepSize, OffsetModifier), IsSetMap);
+                            Noise.SetValue(s1x, s1y, Noise.SampleSquare(s1x, s1y, StepSize, OffsetModifier), IsSetMap);
                         }
 
                         int s2x = originX + (StepSize * 2);
@@ -384,7 +384,7 @@ namespace VertexFragment
 
                         if (Noise.IsValidPosition(s2x, s2y) && !IsSetMap[s2x, s2y])
                         {
-                            Noise.SetValue(s2x, s2y, Noise.SampleSquare2(s2x, s2y, StepSize, OffsetModifier), IsSetMap);
+                            Noise.SetValue(s2x, s2y, Noise.SampleSquare(s2x, s2y, StepSize, OffsetModifier), IsSetMap);
                         }
 
                         int s3x = originX + StepSize;
@@ -392,7 +392,7 @@ namespace VertexFragment
 
                         if (Noise.IsValidPosition(s3x, s3y) && !IsSetMap[s3x, s3y])
                         {
-                            Noise.SetValue(s3x, s3y, Noise.SampleSquare2(s3x, s3y, StepSize, OffsetModifier), IsSetMap);
+                            Noise.SetValue(s3x, s3y, Noise.SampleSquare(s3x, s3y, StepSize, OffsetModifier), IsSetMap);
                         }
                     }
                 }

@@ -1,0 +1,144 @@
+#pragma kernel Diamond
+#pragma kernel Square
+
+RWStructuredBuffer<float> _NoiseBuffer;
+RWStructuredBuffer<float> _IsSetBuffer;
+
+uint _Dimensions;
+uint _Seed;
+uint _StepSize;
+float _OffsetModifier;
+
+// -----------------------------------------------------------------------------------------
+// Common
+// -----------------------------------------------------------------------------------------
+
+/**
+ * Provides a random single output value for a 3-dimensional input value.
+ * The output value is on the range [0.0, 1.0].
+ *
+ * Source: https://www.shadertoy.com/view/4djSRW
+ */
+float Hash13(float3 p3)
+{
+    p3  = frac(p3 * 0.1031f);
+    p3 += dot(p3, p3.yzx + 33.33f);
+    return frac((p3.x + p3.y) * p3.z);
+}
+
+/**
+ * Provides a random value on the range [-1.0, 1.0] for the given thread ID.
+ */
+float Random(uint3 threadId)
+{
+    return (Hash13(float3(threadId.x, threadId.y, _Seed)) * 2.0f) - 1.0f;
+}
+
+/**
+ * Returns the value in _NoiseBuffer at the specified index.
+ * Will return 0 if the index is out-of-bounds.
+ */
+float SampleSafe(int x, int y)
+{
+    if ((x < 0) || (y < 0) || (x >= _Dimensions) || (y >= _Dimensions))
+    {
+        return 0.0f;
+    }
+
+    return _NoiseBuffer[x + (y * _Dimensions)];
+}
+
+/**
+ * Sets the value in _NoiseBuffer at the specified index.
+ * Performs no action if the index is out-of-bounds.
+ */
+void SetValueSafe(int x, int y, float value)
+{
+    if ((x < 0) || (y < 0) || (x >= _Dimensions) || (y >= _Dimensions))
+    {
+        return;
+    }
+
+    int index = (x + (y * _Dimensions));
+
+    _NoiseBuffer[index] = value;
+    _IsSetBuffer[index] = 1.0f;
+}
+
+// -----------------------------------------------------------------------------------------
+// Diamond
+// -----------------------------------------------------------------------------------------
+
+/**
+ * Diamonds sample from the corners, and place a new value in the center of the square.<para/>
+ *
+ *    X───────X
+ *    │       │
+ *    │   O   │
+ *    │       │
+ *    X───────X
+ */
+[numthreads(16, 16, 1)]
+void Diamond(uint3 threadId : SV_DispatchThreadID)
+{
+    if (_IsSetBuffer[x + (y * _Dimensions)] > 0.5f)
+    {
+        return;
+    }
+
+    int modX = (threadId.x - _StepSize / 2) % _StepSize;
+    int modY = (threadId.y - _StepSize / 2) % _StepSize;
+
+    if (modX + modY == 0)
+    {
+        int halfStep = _StepSize / 2;
+
+        float upperLeft  = SampleSafe(threadId.x - halfStep, threadId.y + halfStep);
+        float upperRight = SampleSafe(threadId.x + halfStep, threadId.y + halfStep);
+        float lowerLeft  = SampleSafe(threadId.x - halfStep, threadId.y - halfStep);
+        float lowerRight = SampleSafe(threadId.x + halfStep, threadId.y - halfStep);
+
+        float average = (upperLeft + upperRight + lowerLeft + lowerRight) * 0.25f;
+        float final = average + (Random(threadId) * _OffsetModifier);
+
+        SetValueSafe(threadId.x, threadId.y, final);
+    }
+}
+
+// -----------------------------------------------------------------------------------------
+// Square
+// -----------------------------------------------------------------------------------------
+
+/**
+ *  Squares sample from those adjacent to it, and place a new value in the center of that square.
+ *
+ *    ┌───X───┐
+ *    │       │
+ *    X   O   X
+ *    │       │
+ *    └───X───┘
+ */
+[numthreads(16, 16, 1)]
+void Square(uint3 threadId : SV_DispatchThreadID)
+{
+    if (_IsSetBuffer[x + (y * _Dimensions)] > 0.5f)
+    {
+        return;
+    }
+
+    int modX = (threadId.x % _StepSize);
+    int modY = (threadId.y % _StepSize);
+
+    if (modX + modY == 0)
+    {
+        float left  = SampleSafe(threadId.x - _StepSize, threadId.y);
+        float right = SampleSafe(threadId.x + _StepSize, threadId.y);
+        float upper = SampleSafe(threadId.x, threadId.y + _StepSize);
+        float lower = SampleSafe(threadId.x, threadId.y - _StepSize);
+
+        float average = (left + right + upper + lower) * 0.25f;
+        float final = average + (Random(threadId) * _OffsetModifier);
+
+        SetValueSafe(threadId.x, threadId.y, final);
+    }
+}
