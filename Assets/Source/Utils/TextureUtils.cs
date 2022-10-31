@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 
 namespace VertexFragment
 {
@@ -31,6 +32,28 @@ namespace VertexFragment
             texture.Apply();
 
             return texture;
+        }
+
+        /// <summary>
+        /// Saves the texture as a PNG file on disk. Make sure <see cref="Texture2D.Apply"/> was called.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="path"></param>
+        public static void SavePng(Texture2D source, string path)
+        {
+            if (!path.EndsWith(".png"))
+            {
+                path = $"{path}.png";
+            }
+
+            var fileInfo = new FileInfo(path);
+            fileInfo.Directory.Create();
+
+            Debug.Log($"Saving texture to '{path}' ...");
+
+            var bytes = source.EncodeToPNG();
+
+            File.WriteAllBytes(path, bytes);
         }
     }
 }

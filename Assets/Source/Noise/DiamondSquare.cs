@@ -138,7 +138,7 @@ namespace VertexFragment
         /// <param name="offsetModifier"></param>
         private void DiamondSteps(ThreadPool threadPool, int stepsPerThread, int stepsPerSubdivision, int stepSize, bool[,] isSetMap, float offsetModifier)
         {
-            int jobsPerDimension = 1;// (stepsPerSubdivision / stepsPerThread);
+            int jobsPerDimension = (stepsPerSubdivision / stepsPerThread);
 
             if ((stepsPerSubdivision < stepsPerThread) || (jobsPerDimension == 1))
             {
@@ -197,7 +197,7 @@ namespace VertexFragment
         /// <param name="offsetModifier"></param>
         private void SquareSteps(ThreadPool threadPool, int stepsPerThread, int stepsPerSubdivision, int stepSize, bool[,] isSetMap, float offsetModifier)
         {
-            int jobsPerDimension = 1;// (stepsPerSubdivision / stepsPerThread);
+            int jobsPerDimension = (stepsPerSubdivision / stepsPerThread);
 
             if ((stepsPerSubdivision < stepsPerThread) || (jobsPerDimension == 1))
             {

@@ -66,14 +66,6 @@ namespace VertexFragment
         private static ComputeShader Compute;
 
         // ---------------------------------------------------------------------------------
-        // Debug Properties
-        // ---------------------------------------------------------------------------------
-
-        public bool DiamondOnly = false;
-        public bool SquareOnly = false;
-        public int DebugMaxSteps = 999;
-
-        // ---------------------------------------------------------------------------------
         // Generation
         // ---------------------------------------------------------------------------------
 
@@ -93,36 +85,23 @@ namespace VertexFragment
 
             int threadGroups = Dimensions / (int)threadsPerX;
             float amplitude = Amplitude;
-            int stepSize = (Dimensions - 1) / 4;                    // Our smallest seed map (3x3) already populates the first couple of steps.
+            int stepSize = Dimensions - 1;
 
-            int i = 1;
-
-            while (stepSize >= 1)
+            while (stepSize > 0)
             {
                 float offsetModifier = Mathf.Clamp01(amplitude);
 
                 Compute.SetInt(StepSizeId, stepSize);
                 Compute.SetFloat(OffsetModifierId, offsetModifier);
 
-                if (!SquareOnly)
-                {
-                    Compute.SetBuffer(0, NoiseBufferId, buffers.noiseBuffer);
-                    Compute.SetBuffer(0, IsSetBufferId, buffers.isSetBuffer);
-                    Compute.Dispatch(0, threadGroups, threadGroups, 1);
-                }
+                Compute.SetBuffer(0, NoiseBufferId, buffers.noiseBuffer);
+                Compute.SetBuffer(0, IsSetBufferId, buffers.isSetBuffer);
+                Compute.Dispatch(0, threadGroups, threadGroups, 1);
 
-                if (!DiamondOnly)
-                {
-                    Compute.SetInt(StepSizeId, stepSize / 2);
-                    Compute.SetBuffer(1, NoiseBufferId, buffers.noiseBuffer);
-                    Compute.SetBuffer(1, IsSetBufferId, buffers.isSetBuffer);
-                    Compute.Dispatch(1, threadGroups, threadGroups, 1);
-                }
-
-                if (i++ >= DebugMaxSteps)
-                {
-                    break;
-                }
+                Compute.SetInt(StepSizeId, stepSize / 2);
+                Compute.SetBuffer(1, NoiseBufferId, buffers.noiseBuffer);
+                Compute.SetBuffer(1, IsSetBufferId, buffers.isSetBuffer);
+                Compute.Dispatch(1, threadGroups, threadGroups, 1);
 
                 stepSize /= 2;
                 amplitude *= Persistence;

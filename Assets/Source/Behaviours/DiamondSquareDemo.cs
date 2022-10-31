@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 namespace VertexFragment
 {
+    /// <summary>
+    /// Simple demo scene controller that generates the image and mesh visualizations.
+    /// </summary>
     public sealed class DiamondSquareDemo : MonoBehaviour
     {
         // Controls
@@ -13,6 +16,7 @@ namespace VertexFragment
         public RawImage Noise2D;
         public GameObject Noise3D;
         public Material MeshMaterial;
+        public bool SaveHeightmapToDisk;
 
         // Input
         public Texture2D SeedTexture;
@@ -29,6 +33,7 @@ namespace VertexFragment
         void Start()
         {
             Threads = new ThreadPool(64);
+            Threads.Build();
         }
 
         void Update()
@@ -50,7 +55,7 @@ namespace VertexFragment
         }
 
         /// <summary>
-        /// 
+        /// Has the <see cref="Generate"/> control been toggled?
         /// </summary>
         /// <returns></returns>
         private bool GenerateRequested()
@@ -65,7 +70,7 @@ namespace VertexFragment
         }
 
         /// <summary>
-        /// 
+        /// Generates the Diamond-Square noise using the selected generated (CPU or GPU).
         /// </summary>
         /// <returns></returns>
         private float[,] GenerateNoise()
@@ -109,7 +114,7 @@ namespace VertexFragment
         }
 
         /// <summary>
-        /// 
+        /// Creates the 2D image of the noise.
         /// </summary>
         /// <param name="noise"></param>
         private void Set2DNoiseVisual(float[,] noise)
@@ -124,11 +129,17 @@ namespace VertexFragment
                 Destroy(Noise2D.texture);
             }
 
-            Noise2D.texture = TextureUtils.FloatArrayToTexture(noise);
+            Texture2D noiseTexture = TextureUtils.FloatArrayToTexture(noise);
+            Noise2D.texture = noiseTexture;
+
+            if (SaveHeightmapToDisk)
+            {
+                TextureUtils.SavePng(noiseTexture, $"DiamondSquare_{Dimensions - 1}x{Dimensions - 1}_Seed_{Seed}");
+            }
         }
 
         /// <summary>
-        /// 
+        /// Creates the mesh for the 3D visualization of the noise.
         /// </summary>
         /// <param name="noise"></param>
         private void Set3DNoiseVisual(float[,] noise)
