@@ -81,7 +81,7 @@ void SetValueSafe(int x, int y, float value)
 [numthreads(16, 16, 1)]
 void Diamond(uint3 threadId : SV_DispatchThreadID)
 {
-    if (_IsSetBuffer[x + (y * _Dimensions)] > 0.5f)
+    if (_IsSetBuffer[threadId.x + (threadId.y * _Dimensions)] > 0.5f)
     {
         return;
     }
@@ -121,7 +121,7 @@ void Diamond(uint3 threadId : SV_DispatchThreadID)
 [numthreads(16, 16, 1)]
 void Square(uint3 threadId : SV_DispatchThreadID)
 {
-    if (_IsSetBuffer[x + (y * _Dimensions)] > 0.5f)
+    if (_IsSetBuffer[threadId.x + (threadId.y * _Dimensions)] > 0.5f)
     {
         return;
     }

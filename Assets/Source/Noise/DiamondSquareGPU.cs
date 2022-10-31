@@ -171,7 +171,7 @@ namespace VertexFragment
         /// Does not perform any validation of the source dimensions, etc.
         /// </summary>
         /// <param name="source"></param>
-        public void SetHeightSeedsFromTexture(Texture2D source)
+        public override void SetHeightSeedsFromTexture(Texture2D source)
         {
             HeightSeeds = new float[source.width, source.height];
             Color[] sourcePixels = source.GetPixels(0, 0, source.width, source.height);

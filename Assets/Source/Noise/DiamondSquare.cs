@@ -68,11 +68,6 @@ namespace VertexFragment
         /// <returns></returns>
         public override bool Generate(ThreadPool threadPool)
         {
-            if (!IsValidInput())
-            {
-                return false;
-            }
-
             if (Rng == null)
             {
                 Rng = new System.Random(Seed);
@@ -84,12 +79,11 @@ namespace VertexFragment
             InitializeNoise(isSetMap);
 
             float amplitude = Amplitude;
-            int subdivisions = MathUtils.WhichPowerOf2(Dimensions) - 1;         // Our smallest seed map (3x3) already populates the first couple of steps.
             int stepsPerSubdivision = 1;
-            int stepSize = Dimensions / 4;
+            int stepSize = Dimensions / 2;
             int maxStepsPerThread = 128;
 
-            for (int i = 0; i < subdivisions; ++i)
+            while (stepSize > 0)
             {
                 float offsetModifier = Mathf.Clamp01(amplitude);
 
@@ -144,7 +138,7 @@ namespace VertexFragment
         /// <param name="offsetModifier"></param>
         private void DiamondSteps(ThreadPool threadPool, int stepsPerThread, int stepsPerSubdivision, int stepSize, bool[,] isSetMap, float offsetModifier)
         {
-            int jobsPerDimension = (stepsPerSubdivision / stepsPerThread);
+            int jobsPerDimension = 1;// (stepsPerSubdivision / stepsPerThread);
 
             if ((stepsPerSubdivision < stepsPerThread) || (jobsPerDimension == 1))
             {
@@ -203,7 +197,7 @@ namespace VertexFragment
         /// <param name="offsetModifier"></param>
         private void SquareSteps(ThreadPool threadPool, int stepsPerThread, int stepsPerSubdivision, int stepSize, bool[,] isSetMap, float offsetModifier)
         {
-            int jobsPerDimension = (stepsPerSubdivision / stepsPerThread);
+            int jobsPerDimension = 1;// (stepsPerSubdivision / stepsPerThread);
 
             if ((stepsPerSubdivision < stepsPerThread) || (jobsPerDimension == 1))
             {
@@ -442,7 +436,7 @@ namespace VertexFragment
         /// Does not perform any validation of the source dimensions, etc.
         /// </summary>
         /// <param name="source"></param>
-        public void SetHeightSeedsFromTexture(Texture2D source)
+        public override void SetHeightSeedsFromTexture(Texture2D source)
         {
             HeightSeeds = new float[source.width, source.height];
             Color[] sourcePixels = source.GetPixels(0, 0, source.width, source.height);
@@ -465,51 +459,6 @@ namespace VertexFragment
         private bool IsValidPosition(int x, int y)
         {
             return (x >= 0) && (y >= 0) && (x < Dimensions) && (y < Dimensions);
-        }
-
-        /// <summary>
-        /// Used to validate the control parameters of the algorithm.
-        /// </summary>
-        /// <returns></returns>
-        protected bool IsValidInput()
-        {
-            if (Dimensions < 3)
-            {
-                // Too small.
-                return false;
-            }
-
-            if (!MathUtils.IsPowerOf2Plus1(Dimensions))
-            {
-                // Not 2^n+1.
-                return false;
-            }
-
-            if (HeightSeeds == null)
-            {
-                // Need seeds.
-                return false;
-            }
-
-            if (HeightSeeds.GetLength(0) != HeightSeeds.GetLength(1))
-            {
-                // Seed input must be square.
-                return false;
-            }
-
-            if (!MathUtils.IsPowerOf2Plus1(HeightSeeds.GetLength(0)))
-            {
-                // Not 2^n+1.
-                return false;
-            }
-
-            if (HeightSeeds.GetLength(0) >= Dimensions)
-            {
-                // Too large.
-                return false;
-            }
-
-            return true;
         }
     }
 }

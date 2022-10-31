@@ -1,4 +1,6 @@
-﻿namespace VertexFragment
+﻿using UnityEngine;
+
+namespace VertexFragment
 {
     public abstract class NoiseBase
     {
@@ -22,6 +24,12 @@
         {
             return true;
         }
+
+        /// <summary>
+        /// Pre-fills the noise from the seed texture.
+        /// </summary>
+        /// <param name="source"></param>
+        public abstract void SetHeightSeedsFromTexture(Texture2D source);
 
         /// <summary>
         /// Retrieves the noise value, on the range <c>[0.0, 1.0]</c>, for the specified 2D position.

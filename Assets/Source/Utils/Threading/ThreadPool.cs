@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace VertexFragment
         /// <summary>
         /// The maximum amount of time, by default, that <see cref="Sync"/> will wait for.
         /// </summary>
-        public int MaxSyncWaitMs { get; set; } = 30000;
+        public int MaxSyncWaitMs { get; set; } = 10000;
 
         /// <summary>
         /// The number of workers currently processing a job.
@@ -78,7 +79,7 @@ namespace VertexFragment
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                UnityEngine.Debug.LogException(e);
                 return false;
             }
         }
@@ -184,14 +185,24 @@ namespace VertexFragment
         /// <param name="maxWaitMs"></param>
         public bool Sync(int maxWaitMs)
         {
-            DateTime start = DateTime.Now;
+            Stopwatch sw = Stopwatch.StartNew();
 
-            SpinWait.SpinUntil(() =>
+            while (sw.ElapsedMilliseconds < maxWaitMs)
             {
-                return ((ActiveWorkers <= 0) || ((DateTime.Now - start).TotalMilliseconds >= maxWaitMs));
-            });
+                SpinWait.SpinUntil(() =>
+                {
+                    return (IsEmpty() || (sw.ElapsedMilliseconds > 100));
+                });
 
-            return (ActiveWorkers <= 0);
+                if (IsEmpty())
+                {
+                    return true;
+                }
+
+                RunFrontJob();
+            }
+
+            return false;
         }
 
         /// <summary>
