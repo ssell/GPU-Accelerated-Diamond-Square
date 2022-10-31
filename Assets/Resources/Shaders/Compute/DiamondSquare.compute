@@ -70,7 +70,7 @@ void SetValueSafe(int x, int y, float value)
 // -----------------------------------------------------------------------------------------
 
 /**
- * Diamonds sample from the corners, and place a new value in the center of the square.<para/>
+ * Diamonds sample from the corners, and place a new value in the center of the diamond.
  *
  *    X───────X
  *    │       │
